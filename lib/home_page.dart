@@ -1,10 +1,10 @@
 import 'package:animate_do/animate_do.dart';
-import 'package:dash_chat_2/dash_chat_2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:speech_to_text/speech_recognition_result.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 import 'package:test_app/feature.dart';
+import 'package:test_app/gemini_api_service.dart';
 import 'package:test_app/openAi_service.dart';
 import 'package:test_app/pallete.dart';
 
@@ -52,6 +52,10 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> systemSpeak(String content) async {
     await flutterTts.speak(content);
+  }
+
+  Future<void> systemStopSpeak() async {
+    await flutterTts.stop();
   }
 
   @override
@@ -216,12 +220,14 @@ class _HomePageState extends State<HomePage> {
         child: FloatingActionButton(
           backgroundColor: Pallete.firstSuggestionBoxColor,
           onPressed: () async {
+            await systemStopSpeak();
             if (await speechToText.hasPermission &&
                 speechToText.isNotListening) {
               await startListening();
             } else if (speechToText.isListening) {
-              final speech = await openAIService.isArtPromptAPI(lastwords);
-              if (speech.contains('hhtps')) {
+              // final speech = await openAIService.isArtPromptAPI(lastwords);
+              final speech = await geminiApi(lastwords);
+              if (speech!.contains('hhtps')) {
                 generatedImageUrl = speech;
                 generatedContent = null;
                 setState(() {});
